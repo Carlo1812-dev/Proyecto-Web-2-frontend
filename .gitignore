@@ -1,0 +1,30 @@
+# ===== Angular / Node =====
+node_modules/
+dist/
+.angular/
+tmp/
+out-tsc/
+.cache/
+
+# ===== Build =====
+build/
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Sistema =====
+.idea/
+.vscode/
+.sass-cache/
+.connect/
+coverage/
+*.launch
+.DS_Store
+Thumbs.db
+
+# ===== Variables de entorno =====
+.env
+.env.local
