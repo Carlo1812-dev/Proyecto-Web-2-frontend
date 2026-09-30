@@ -1,0 +1,46 @@
+<div class="contenedor">
+  <div class="tarjeta">
+    <aside class="acceso-lado">
+      <img class="acceso-logo" src="img/logo.svg" alt="Mi Cacharrito">
+      <h1>Mi Cacharrito</h1>
+      <p>Tu vehiculo ideal a un par de clics de distancia.</p>
+      <ul class="acceso-lista">
+        <li>Reserva en menos de un minuto</li>
+        <li>Cancela sin penalidades</li>
+        <li>Contrato en PDF al instante</li>
+      </ul>
+      <img class="acceso-auto" [src]="foto" alt="">
+    </aside>
+
+    <section class="acceso-formulario">
+      <h2>Iniciar Sesion</h2>
+      <p class="text-muted">Ingrese con su numero de identificacion y contrasena</p>
+
+      @if (error) {
+        <div class="alert alert-danger">{{ error }}</div>
+      }
+
+      <form (submit)="ingresar(); $event.preventDefault()">
+        <div class="mb-3">
+          <label class="form-label">Numero de Identificacion</label>
+          <input type="text" class="form-control" [(ngModel)]="identificacion"
+                 name="identificacion" autocomplete="username" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Contrasena</label>
+          <input type="password" class="form-control" [(ngModel)]="password"
+                 name="password" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" [disabled]="cargando">
+          {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+      </form>
+
+      <p class="text-center mt-3 mb-0">
+        ¿No tiene cuenta? <a routerLink="/registro">Registrese aqui</a>
+      </p>
+    </section>
+  </div>
+</div>
