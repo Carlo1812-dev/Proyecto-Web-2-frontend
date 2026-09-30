@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-lg navbar-mc shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/login">
+      <img src="img/logo.svg" alt="" width="34" height="34" class="marca-icono">
+      <span class="marca-texto">
+        Mi Cacharrito
+        <small>Alquiler de vehiculos</small>
+      </span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+            aria-controls="menuPrincipal" aria-expanded="false" aria-label="Alternar navegacion">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menuPrincipal">
+      <ul class="navbar-nav me-auto">
+        @if (sesion.iniciado()) {
+          @if (sesion.esAdmin()) {
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/admin" routerLinkActive="activo">Panel Admin</a>
+            </li>
+          } @else {
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/vehiculos" routerLinkActive="activo">Vehiculos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/alquileres" routerLinkActive="activo">Mis Alquileres</a>
+            </li>
+          }
+        }
+      </ul>
+
+      <ul class="navbar-nav align-items-lg-center">
+        @if (sesion.iniciado()) {
+          <li class="nav-item">
+            <span class="usuario-chip">
+              <span class="usuario-inicial">{{ sesion.usuario()?.nombreCompleto?.charAt(0) || 'U' }}</span>
+              <span class="usuario-datos">
+                {{ sesion.usuario()?.nombreCompleto }}
+                @if (sesion.esAdmin()) {
+                  <b class="usuario-rol">ADMIN</b>
+                }
+              </span>
+            </span>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <button class="btn btn-salir" (click)="cerrarSesion()">Cerrar sesion</button>
+          </li>
+        } @else {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/registro" routerLinkActive="activo">Registrarse</a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>
