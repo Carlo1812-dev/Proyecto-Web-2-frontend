@@ -1,0 +1,162 @@
+<div class="pagina container">
+
+  <header class="hero">
+    <div class="hero-texto">
+      <span class="hero-lema">Alquila rapido, conduce tranquilo</span>
+      <h1 class="hero-titulo">Vehiculos disponibles</h1>
+      <p class="hero-desc">
+        Elige el vehiculo que mas te guste, define las fechas y confirma tu alquiler en segundos.
+      </p>
+    </div>
+    <div class="hero-dato">
+      <strong>{{ vehiculos.length }}</strong>
+      <span>en ruedas</span>
+    </div>
+    <img class="hero-auto" src="img/vehiculos/automovil.svg" alt="" aria-hidden="true">
+  </header>
+
+  @if (error && !seleccion) {
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+  }
+
+  @if (seleccion) {
+    <section class="panel-alquiler">
+      <div class="panel-cabecera">
+        <img class="panel-miniatura" [src]="imagen(seleccion.tipo)" [alt]="seleccion.tipo">
+        <div>
+          <span class="chip-tipo" [style.background]="acento(seleccion.tipo)">
+            {{ alquilerCreado ? 'Alquiler generado' : 'Nuevo alquiler' }}
+          </span>
+          <h2 class="panel-titulo">{{ seleccion.marca }} {{ seleccion.modelo }}</h2>
+          <p class="panel-datos">
+            <span><b>Placa</b> {{ seleccion.placa }}</span>
+            <span><b>Color</b> {{ seleccion.color }}</span>
+            <span><b>Anio</b> {{ seleccion.anio }}</span>
+            <span><b>Dia</b> ${{ seleccion.valorAlquiler | number:'1.0-0' }}</span>
+          </p>
+        </div>
+        <button class="btn-cerrar" type="button" (click)="cerrarFormulario()" aria-label="Cerrar">
+          &times;
+        </button>
+      </div>
+
+      @if (alquilerCreado) {
+        <div class="panel-exito">
+          <div class="exito-dato"><span>Numero de alquiler</span><strong>{{ alquilerCreado.numeroAlquiler }}</strong></div>
+          <div class="exito-dato"><span>Estado</span><strong>{{ alquilerCreado.descripcionEstado }}</strong></div>
+          <div class="exito-dato"><span>Valor total</span><strong>${{ alquilerCreado.valorTotal | number:'1.0-0' }}</strong></div>
+          <div class="exito-dato"><span>Vehiculo</span><strong>{{ seleccion.placa }}</strong></div>
+        </div>
+
+        @if (error) {
+          <div class="alert alert-danger">{{ error }}</div>
+        }
+        @if (exito) {
+          <div class="alert alert-info">{{ exito }}</div>
+        }
+
+        <div class="panel-acciones">
+          <button class="btn btn-acento" (click)="descargarPdf()">Descargar PDF</button>
+          <button class="btn btn-primary" (click)="irAlquileres()">Ver mis alquileres</button>
+          <button class="btn btn-outline-secondary" (click)="cerrarFormulario()">Cerrar</button>
+        </div>
+      } @else {
+        @if (error) {
+          <div class="alert alert-danger">{{ error }}</div>
+        }
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Fecha de inicio</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaInicio" [min]="fechaMinima">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Fecha de entrega</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaEntrega"
+                   [min]="fechaInicio || fechaMinima">
+          </div>
+        </div>
+
+        <div class="panel-acciones mt-3">
+          <button class="btn btn-primary" (click)="confirmar()" [disabled]="cargando">
+            {{ cargando ? 'Procesando...' : 'Confirmar alquiler' }}
+          </button>
+          <button class="btn btn-outline-secondary" (click)="cerrarFormulario()">Cancelar</button>
+        </div>
+      }
+    </section>
+  }
+
+  <div class="barra-filtros">
+    <span class="barra-titulo">Filtrar por tipo</span>
+    <div class="chips">
+      @for (t of tipos; track t.valor) {
+        <button type="button"
+                class="chip"
+                [class.chip-activo]="filtroTipo === t.valor"
+                [style.--chip-color]="t.valor ? acento(t.valor) : '#1d4ed8'"
+                (click)="filtrarPor(t.valor)">
+          {{ t.nombre }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="row fila-vehiculos">
+    @for (vehiculo of vehiculosPagina; track vehiculo.id) {
+      <div class="col-xxl-3 col-lg-4 col-sm-6 mb-4">
+        <article class="ficha">
+          <div class="ficha-media" [style.--globo]="acento(vehiculo.tipo)">
+            <img [src]="imagen(vehiculo.tipo)" [alt]="vehiculo.tipo" loading="lazy">
+            <span class="ficha-tipo">{{ vehiculo.tipo }}</span>
+            <span class="ficha-placa">{{ vehiculo.placa }}</span>
+          </div>
+
+          <div class="ficha-cuerpo">
+            <h3 class="ficha-titulo">{{ vehiculo.marca }} {{ vehiculo.modelo }}</h3>
+            <ul class="ficha-lista">
+              <li><span>Color</span><b>{{ vehiculo.color }}</b></li>
+              <li><span>Anio</span><b>{{ vehiculo.anio }}</b></li>
+            </ul>
+          </div>
+
+          <div class="ficha-pie">
+            <div class="ficha-precio">
+              <span>por dia</span>
+              <strong>${{ vehiculo.valorAlquiler | number:'1.0-0' }}</strong>
+            </div>
+            <button class="btn btn-primary ficha-boton" (click)="elegir(vehiculo)">
+              Alquilar
+            </button>
+          </div>
+        </article>
+      </div>
+    } @empty {
+      <div class="col-12">
+        <div class="vacio">
+          <img class="vacio-img" [src]="imagen('AUTOMOVIL')" alt="">
+          <p class="mb-0">No hay vehiculos disponibles para este filtro.</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (vehiculos.length > porPagina) {
+    <div class="paginacion">
+      <span class="paginacion-info">Mostrando {{ rangoVehiculos }} vehiculos</span>
+      <div class="paginacion-botones">
+        <button type="button" class="btn btn-outline-secondary btn-sm"
+                [disabled]="pagina === 1"
+                (click)="irAPagina(pagina - 1)">&lsaquo; Anterior</button>
+        @for (p of paginas; track p) {
+          <button type="button" class="btn btn-sm pagina"
+                  [class.pagina-activa]="p === pagina"
+                  (click)="irAPagina(p)">{{ p }}</button>
+        }
+        <button type="button" class="btn btn-outline-secondary btn-sm"
+                [disabled]="pagina === totalPaginas"
+                (click)="irAPagina(pagina + 1)">Siguiente &rsaquo;</button>
+      </div>
+    </div>
+  }
+</div>
