@@ -1,0 +1,111 @@
+<div class="pagina container">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h2 class="titulo-seccion mb-0">Mis Alquileres</h2>
+      <small class="text-muted">Cuenta: {{ usuario }} · {{ total }} alquiler(es)</small>
+      @if (cancelados > 0) {
+        <small class="d-block text-muted">{{ cancelados }} cancelado(s) ya no se muestran</small>
+      }
+      <small class="d-block api-nota">{{ api }}</small>
+    </div>
+    <button class="btn btn-outline-primary" (click)="recargar()" [disabled]="cargando">
+      {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  @if (mensaje) {
+    <div class="alert alert-success">{{ mensaje }}</div>
+  }
+  @if (error) {
+    <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span>{{ error }}</span>
+      <span class="d-flex gap-2">
+        @if (sinSesion) {
+          <a routerLink="/login" class="btn btn-sm btn-outline-light">Iniciar sesion</a>
+        } @else {
+          <button class="btn btn-sm btn-outline-light" (click)="recargar()">Reintentar</button>
+        }
+      </span>
+    </div>
+  }
+
+  @if (cargando && !sinSesion) {
+    <div class="cargando text-center py-4">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="text-muted mt-2 mb-0">Consultando <b>{{ api }}</b></p>
+      <p class="text-muted mb-0">con la cuenta <b>{{ usuario }}</b>… se corta a los 5 s si no responde.</p>
+    </div>
+  }
+
+  <div class="lista row">
+    @for (alquiler of visibles; track alquiler.id) {
+      <div class="col-lg-4 col-md-6 mb-4">
+        <article class="alquiler-card" [class.atrasado]="alquiler.atrasado"
+                 [style.--globo]="acento(alquiler.vehiculo.tipo)">
+          <!-- TAREA 5 - Alerta de devolucion y calculo de dias de mora -->
+          @if (alquiler.atrasado) {
+            <div class="alerta-devolucion">
+              Devolucion atrasada: {{ alquiler.diasAtraso }} dia(s) de mora
+              (cobro extra ${{ alquiler.diasAtraso * alquiler.vehiculo.valorAlquiler | number:'1.0-0' }})
+            </div>
+          }
+
+          <div class="alquiler-media">
+            <img [src]="imagen(alquiler.vehiculo.tipo)" [alt]="alquiler.vehiculo.tipo" loading="lazy">
+            <span class="alquiler-tipo">{{ alquiler.vehiculo.tipo }}</span>
+            <span class="alquiler-placa">{{ alquiler.vehiculo.placa }}</span>
+          </div>
+
+          <div class="alquiler-cuerpo">
+            <div class="alquiler-fila">
+              <h3 class="alquiler-numero">{{ alquiler.numeroAlquiler }}</h3>
+              <span class="badge" [ngClass]="
+                alquiler.estado === 'DEVUELTO' ? 'bg-success'
+                : alquiler.estado === 'CANCELADO' ? 'bg-secondary'
+                : alquiler.estado === 'ENTREGADO' ? 'bg-info text-dark'
+                : 'bg-warning text-dark'">
+                {{ alquiler.descripcionEstado }}
+              </span>
+            </div>
+
+            <ul class="alquiler-datos">
+              <li><span>Vehiculo</span><b>{{ alquiler.vehiculo.marca }} {{ alquiler.vehiculo.modelo }}</b></li>
+              <li><span>Color</span><b>{{ alquiler.vehiculo.color }}</b></li>
+              <li><span>Inicio</span><b>{{ alquiler.fechaInicio }}</b></li>
+              <li><span>Entrega</span><b>{{ alquiler.fechaEntrega }}</b></li>
+              <li class="total"><span>Valor total</span><b>${{ alquiler.valorTotal | number:'1.0-0' }}</b></li>
+            </ul>
+
+            <!-- TAREA 5 - Alerta de devolucion y calculo de dias de mora -->
+            @if (alquiler.diasMora > 0) {
+              <p class="mora mb-0">
+                Devuelta con {{ alquiler.diasMora }} dia(s) de mora: ${{ alquiler.valorMora | number:'1.0-0' }}
+              </p>
+            }
+          </div>
+
+          <div class="alquiler-pie">
+            <button class="btn btn-primary flex-grow-1" (click)="descargar(alquiler.numeroAlquiler)">
+              Descargar PDF
+            </button>
+            @if (puedeCancelar(alquiler)) {
+              <button class="btn btn-outline-danger" (click)="cancelar(alquiler)">
+                Cancelar
+              </button>
+            }
+          </div>
+        </article>
+      </div>
+    } @empty {
+      @if (!cargando && !error) {
+        <div class="col-12">
+          <div class="vacio">
+            <img class="vacio-img" [src]="imagen('MOTOCICLETA')" alt="">
+            <p class="mb-2">No tiene alquileres registrados con la cuenta <strong>{{ usuario }}</strong>.</p>
+            <a routerLink="/vehiculos" class="btn btn-primary">Ver vehiculos disponibles</a>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
